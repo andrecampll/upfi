@@ -17,14 +17,59 @@ export default function Home(): JSX.Element {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery(
-    'images',
+    'images'
     // TODO AXIOS REQUEST WITH PARAM
-    ,
     // TODO GET AND RETURN NEXT PAGE PARAM
   );
 
   const formattedData = useMemo(() => {
     // TODO FORMAT AND FLAT DATA ARRAY
+    const mock = [
+      {
+        id: '1',
+        title: 'doge',
+        description: 'doge',
+        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
+        ts: 1,
+      },
+      {
+        id: '2',
+        title: 'doge',
+        description: 'doge',
+        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
+        ts: 1,
+      },
+      {
+        id: '3',
+        title: 'doge',
+        description: 'doge',
+        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
+        ts: 1,
+      },
+      {
+        id: '4',
+        title: 'doge',
+        description: 'doge',
+        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
+        ts: 1,
+      },
+      {
+        id: '5',
+        title: 'doge',
+        description: 'doge',
+        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
+        ts: 1,
+      },
+      {
+        id: '6',
+        title: 'doge',
+        description: 'doge',
+        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
+        ts: 1,
+      },
+    ];
+
+    return mock;
   }, [data]);
 
   // TODO RENDER LOADING SCREEN
