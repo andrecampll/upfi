@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Button, Box } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { useInfiniteQuery } from 'react-query';
@@ -9,6 +10,12 @@ import { Loading } from '../components/Loading';
 import { Error } from '../components/Error';
 
 export default function Home(): JSX.Element {
+  const fetchPhotos = async ({ pageParam = null }) => {
+    const response = await api.get(`/api/images?after=${pageParam}`);
+
+    return response.data;
+  };
+
   const {
     data,
     isLoading,
@@ -16,73 +23,47 @@ export default function Home(): JSX.Element {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery(
-    'images'
-    // TODO AXIOS REQUEST WITH PARAM
-    // TODO GET AND RETURN NEXT PAGE PARAM
-  );
+  } = useInfiniteQuery('images', fetchPhotos, {
+    getNextPageParam: lastPage => {
+      if (lastPage) {
+        return lastPage;
+      }
+
+      return null;
+    },
+  });
 
   const formattedData = useMemo(() => {
-    // TODO FORMAT AND FLAT DATA ARRAY
-    const mock = [
-      {
-        id: '1',
-        title: 'doge',
-        description: 'doge',
-        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
-        ts: 1,
-      },
-      {
-        id: '2',
-        title: 'doge',
-        description: 'doge',
-        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
-        ts: 1,
-      },
-      {
-        id: '3',
-        title: 'doge',
-        description: 'doge',
-        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
-        ts: 1,
-      },
-      {
-        id: '4',
-        title: 'doge',
-        description: 'doge',
-        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
-        ts: 1,
-      },
-      {
-        id: '5',
-        title: 'doge',
-        description: 'doge',
-        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
-        ts: 1,
-      },
-      {
-        id: '6',
-        title: 'doge',
-        description: 'doge',
-        url: 'https://media.moneytimes.com.br/uploads/2020/07/doge-dogecoin.jpg',
-        ts: 1,
-      },
-    ];
+    const formatted = data?.pages[0].data.map(item => ({
+      ...item,
+    }));
 
-    return mock;
+    return formatted;
   }, [data]);
 
-  // TODO RENDER LOADING SCREEN
+  if (isError) {
+    return (
+      <>
+        <Header />
 
-  // TODO RENDER ERROR SCREEN
+        <Box maxW={1120} px={20} mx="auto" my={20}>
+          <Error />
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>
       <Header />
 
       <Box maxW={1120} px={20} mx="auto" my={20}>
-        <CardList cards={formattedData} />
-        {/* TODO RENDER LOAD MORE BUTTON IF DATA HAS NEXT PAGE */}
+        {isLoading ? <Loading /> : <CardList cards={formattedData} />}
+        {hasNextPage && (
+          <Button onClick={() => fetchNextPage()}>
+            {isFetchingNextPage ? 'Carregando...' : 'Carregar mais'}
+          </Button>
+        )}
       </Box>
     </>
   );
