@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Button, Box } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { useInfiniteQuery } from 'react-query';
@@ -9,9 +8,26 @@ import { api } from '../services/api';
 import { Loading } from '../components/Loading';
 import { Error } from '../components/Error';
 
+type Image = {
+  title: string;
+  description: string;
+  url: string;
+  ts: number;
+  id: string;
+};
+
+type ImagesResponse = {
+  data: Image[];
+  after: string;
+};
+
 export default function Home(): JSX.Element {
-  const fetchPhotos = async ({ pageParam = null }) => {
-    const response = await api.get(`/api/images?after=${pageParam}`);
+  const fetchPhotos = async ({ pageParam = null }): Promise<ImagesResponse> => {
+    const response = await api.get('/api/images', {
+      params: {
+        after: pageParam,
+      },
+    });
 
     return response.data;
   };
@@ -24,21 +40,13 @@ export default function Home(): JSX.Element {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery('images', fetchPhotos, {
-    getNextPageParam: lastPage => {
-      if (lastPage) {
-        return lastPage;
-      }
-
-      return null;
-    },
+    getNextPageParam: lastPage => lastPage.after,
   });
 
   const formattedData = useMemo(() => {
-    const formatted = data?.pages[0].data.map(item => ({
-      ...item,
-    }));
-
-    return formatted;
+    return data?.pages.flatMap(imageData => {
+      return imageData.data.flat();
+    });
   }, [data]);
 
   if (isError) {
@@ -60,8 +68,13 @@ export default function Home(): JSX.Element {
       <Box maxW={1120} px={20} mx="auto" my={20}>
         {isLoading ? <Loading /> : <CardList cards={formattedData} />}
         {hasNextPage && (
-          <Button onClick={() => fetchNextPage()}>
-            {isFetchingNextPage ? 'Carregando...' : 'Carregar mais'}
+          <Button
+            type="button"
+            onClick={() => fetchNextPage()}
+            loadingText="Carregando..."
+            isLoading={isFetchingNextPage}
+          >
+            Carregar mais
           </Button>
         )}
       </Box>
